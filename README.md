@@ -1,7 +1,24 @@
 # pyspark-uploader
-Enables rapid development of packages to be used via PySpark on a Spark cluster by uploading a local Python package to the cluster.
+Enables rapid development of packages or modules to be used via PySpark on a 
+Spark cluster by uploading a local Python package to the cluster.
 
 Author: Scott Hajek
+
+## Motivation
+
+Functions defined in the `__main__` scope (e.g. in a jupyter notebook or pyspark 
+shell) can directly turned into a user-defined function (UDF) and used. However, 
+functions imported from modules or packages that do not exist in the cluster 
+cannot. Well-established packages that are already in a compress archive 
+(tarball) can easily be added to the cluster with `sc.addPyFile()`, but custom 
+ones that you are actively developing alongside the pyspark notebook or 
+application cannot. You would have to find the path of the package that your 
+function came from, zip/targz it, then pass the archive's path to 
+`sc.addPyFile`. 
+
+This package facilitates this process by automatically determining the package 
+directory where the function was imported from, creating the compressed archive 
+in a temp file, running `addPyFile`, and running the UDF definition. 
 
 
 ## Example usage
