@@ -1,6 +1,7 @@
 import unittest
 import sys
 import os
+import re
 
 import pandas as pd
 import numpy as np
@@ -35,6 +36,20 @@ def generate_pandas_df():
     return pd.DataFrame(np.random.rand(20, 5), columns=list('abcde'))
 
 
+def assertRaisesRegex(testcase, exception_class, regex, callable, *args, **kwds):
+    try:
+        callable(*args, **kwds)
+    except exception_class as e:
+        ex = e
+    else:
+        testcase.fail('Did not raise {}'.format(exception_class.__name__))
+
+    if not re.search(regex, str(ex)):
+        testcase.fail(
+            'Raised expected exception class but did not contain regex "{}" in message {}'.format(regex, str(ex))
+        )
+
+
 class TestWithoutFails(unittest.TestCase):
     """Test that without the special upload logic the udf doesn't work"""
     def setUp(self):
@@ -47,12 +62,12 @@ class TestWithoutFails(unittest.TestCase):
     def test_package_fails(self):
         square_udf = F.udf(dummy_package.math.square, spark_types.DoubleType())
         spark_df2 = self.spark_df.withColumn('a_sq', square_udf(F.col('a')))
-        self.assertRaisesRegex(Py4JJavaError, 'ModuleNotFoundError', spark_df2.toPandas)
+        assertRaisesRegex(self, Py4JJavaError, '(ModuleNotFoundError|ImportError)', spark_df2.toPandas)
 
     def test_module_fails(self):
         mult_udf = F.udf(dummy_module.mult, spark_types.DoubleType())
         spark_df2 = self.spark_df.withColumn('ab', mult_udf(F.col('a'), F.col('b')))
-        self.assertRaisesRegex(Py4JJavaError, 'ModuleNotFoundError', spark_df2.toPandas)
+        assertRaisesRegex(self, Py4JJavaError, '(ModuleNotFoundError|ImportError)', spark_df2.toPandas)
 
     def test_main_works_without_upload(self):
         main_square_udf = F.udf(main_square, spark_types.DoubleType())
