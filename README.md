@@ -41,3 +41,6 @@ df2 = df.withColumn('cleaned', clean_text_udf(F.col('text')))
 df2.write.saveAsTable('result_table')
 ```
 
+Note that without using `udf_from_module` and using `F.udf` instead, the error 
+does not occur until an action is called on the resulting dataframe, such as 
+`df2.collect()`, `df2.toPandas()`, etc. 
