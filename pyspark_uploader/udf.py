@@ -27,7 +27,7 @@ def get_pkg_name(func):
 def get_path_to_pkg(func):
     # pydoc.locate trick adapted from https://stackoverflow.com/a/24815361/1789708
     path = pydoc.locate(get_pkg_name(func)).__file__
-    if os.path.basename(path) == '__init__.py':
+    if os.path.basename(path) in ('__init__.py', '__init__.pyc'):
         path = os.path.dirname(path)
     return path
 
