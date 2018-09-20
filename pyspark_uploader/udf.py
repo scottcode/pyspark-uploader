@@ -14,7 +14,7 @@ def get_module_type(func):
     if len(module_breadcrumbs) == 1:
         return 'module'
     location = pydoc.locate(module_breadcrumbs[0]).__file__
-    if os.path.basename(location) == '__init__.py':
+    if os.path.basename(location) in ('__init__.py', '__init__.pyc'):
         return 'package'
     else:
         raise ValueError('did not recognize module type')
